@@ -21,22 +21,33 @@ const removeNote = (id) => {
         notes.splice(noteIndex, 1);
     }
 }
+// Generate last edited
+
+const generateLastEdited = (created, edited, container) => {
+    if (created === edited) {
+        container.textContent = `Created at ${moment(created).format("DD-MM-YYYYr. HH:mm:ss")}`
+
+    } else if (created < edited) {
+        container.textContent = `Last updated ${moment(edited).fromNow()}`
+    }
+}
 
 // Generate the DOM Structure for a note
 const generateDOM = (note) => {
-    const noteEl = document.createElement("div");
-    const textEl = document.createElement("a");
-    const button = document.createElement("button");
+    const noteEl = document.createElement("a");
+    const textEl = document.createElement("p");
+    const statusEl = document.createElement("p")
+    // const button = document.createElement("button");
 
-    // Setup remove note button
-    button.textContent = "x";
-    button.addEventListener("click", () => {
-        removeNote(note.id);
-        saveNotes(notes);
-        renderNotes(notes, filters);
+    // // Setup remove note button
+    // button.textContent = "x";
+    // button.addEventListener("click", () => {
+    //     removeNote(note.id);
+    //     saveNotes(notes);
+    //     renderNotes(notes, filters);
 
-    });
-    noteEl.appendChild(button);
+    // });
+    // noteEl.appendChild(button);
 
     // Setup the note title text
     if (note.title.length > 0) {
@@ -44,9 +55,18 @@ const generateDOM = (note) => {
     } else {
         textEl.textContent = "Unnamed note"
     }
-    textEl.setAttribute("href", `/edit.html#${note.id}`);
+    textEl.classList.add("list-item__title");
+    //textEl.setAttribute("href", `/edit.html#${note.id}`);
     noteEl.appendChild(textEl);
 
+    // Setup the link
+    noteEl.setAttribute("href", `/edit.html#${note.id}`);
+    noteEl.classList.add("list-item")
+
+    // Setup the status message
+    statusEl.textContent = generateLastEdited(note.createdAt);
+    statusEl.classList.add("list-item__subtitle");
+    noteEl.appendChild(statusEl);
     return noteEl;
 }
 
@@ -97,19 +117,18 @@ const renderNotes = (notes, filters) => {
 
     noteContainer.innerHTML = "";
 
-    filteredNotes.forEach(note => {
-        const noteEl = generateDOM(note);
-        noteContainer.appendChild(noteEl);
-    });
-}
-
-// Generate last edited
-
-const generateLastEdited = (created, edited, container) => {
-    if (created === edited) {
-        container.textContent = `Created at ${moment(created).format("DD-MM-YYYYr. HH:mm:ss")}`
-
-    } else if (created < edited) {
-        container.textContent = `Last updated ${moment(edited).fromNow()}`
+    if (filteredNotes.length > 0) {
+        filteredNotes.forEach(note => {
+            const noteEl = generateDOM(note);
+            noteContainer.appendChild(noteEl);
+        });
+    } else {
+        const emptyMessage = document.createElement("p");
+        emptyMessage.textContent = "No notes to show.";
+        emptyMessage.classList.add("empty-message")
+        noteContainer.appendChild(emptyMessage);
     }
+
+
 }
+
